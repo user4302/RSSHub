@@ -1,6 +1,7 @@
-import { Route } from '@/types';
-import got from '@/utils/got';
 import { load } from 'cheerio';
+
+import type { Route } from '@/types';
+import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -41,12 +42,12 @@ async function handler() {
     });
 
     const $ = load(response.data);
-    const list = $('.article-list li').get();
+    const list = $('.article-list li').toArray();
 
     return {
         title: 'Rust语言中文社区 | 招聘',
         link: jobs_url,
-        description: `获取Rust语言中文社区的最新招聘`,
+        description: '获取Rust语言中文社区的最新招聘',
         item: await Promise.all(list.map((item) => getFeedItem(item))),
     };
 }

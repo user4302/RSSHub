@@ -1,13 +1,18 @@
-import { Route, ViewType } from '@/types';
-import cache from '@/utils/cache';
-import { getUser, renderNotesFulltext, getUserWithCookie } from './util';
-import InvalidParameterError from '@/errors/types/invalid-parameter';
+import querystring from 'node:querystring';
+
 import { config } from '@/config';
+import InvalidParameterError from '@/errors/types/invalid-parameter';
+import type { Route } from '@/types';
+import { ViewType } from '@/types';
+import cache from '@/utils/cache';
+import { fallback, queryToBoolean } from '@/utils/readable-social';
+
+import { getUser, getUserWithCookie, renderNotesFulltext } from './util';
 
 export const route: Route = {
-    path: '/user/:user_id/:category',
+    path: '/user/:user_id/:category/:routeParams?',
     name: '用户笔记/收藏',
-    categories: ['social-media', 'popular'],
+    categories: ['social-media'],
     view: ViewType.Articles,
     maintainers: ['lotosbin', 'howerhe', 'rien7', 'dddaniel1', 'pseudoyu'],
     handler,
@@ -45,20 +50,26 @@ export const route: Route = {
             ],
             default: 'notes',
         },
+        routeParams: {
+            description: 'displayLivePhoto,`/user/:user_id/notes/displayLivePhoto=0`,不限时LivePhoto显示为图片,`/user/:user_id/notes/displayLivePhoto=1`,取值不为0时LivePhoto显示为视频',
+            default: '0',
+        },
     },
 };
 
 async function handler(ctx) {
     const userId = ctx.req.param('user_id');
     const category = ctx.req.param('category');
+    const routeParams = querystring.parse(ctx.req.param('routeParams'));
+    const displayLivePhoto = !!fallback(undefined, queryToBoolean(routeParams.displayLivePhoto), false);
     const url = `https://www.xiaohongshu.com/user/profile/${userId}`;
     const cookie = config.xiaohongshu.cookie;
 
     if (cookie && category === 'notes') {
         try {
             const urlNotePrefix = 'https://www.xiaohongshu.com/explore';
-            const user = await getUserWithCookie(url, cookie);
-            const notes = await renderNotesFulltext(user.notes, urlNotePrefix);
+            const user = await getUserWithCookie(url);
+            const notes = await renderNotesFulltext(user.notes, urlNotePrefix, displayLivePhoto);
             return {
                 title: `${user.userPageData.basicInfo.nickname} - 笔记 • 小红书 / RED`,
                 description: user.userPageData.basicInfo.desc,
@@ -90,9 +101,9 @@ async function getUserFeeds(url: string, category: string) {
         notes.flatMap((n) =>
             n.map(({ id, noteCard }) => ({
                 title: noteCard.displayTitle,
-                link: `${url}/${noteCard.noteId || id}`,
-                guid: noteCard.noteId || id || noteCard.displayTitle,
-                description: `<img src ="${noteCard.cover.infoList.pop().url}"><br>${noteCard.displayTitle}`,
+                link: new URL(noteCard.noteId || id, url).toString(),
+                guid: noteCard.displayTitle,
+                description: `<img src="${noteCard.cover.infoList.pop().url}" width="${noteCard.cover.width}" height="${noteCard.cover.height}"><br>${noteCard.displayTitle}`,
                 author: noteCard.user.nickname,
                 upvotes: noteCard.interactInfo.likedCount,
             }))

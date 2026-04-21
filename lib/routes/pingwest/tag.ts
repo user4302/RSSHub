@@ -1,12 +1,14 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
+
 import utils from './utils';
 
 export const route: Route = {
     path: '/tag/:tag/:type/:option?',
-    categories: ['new-media', 'popular'],
+    categories: ['new-media'],
     example: '/pingwest/tag/ChinaJoy/1',
     parameters: { tag: '话题名或话题id, 可从话题页url中得到', type: '内容类型', option: '参数, 默认无' },
     features: {
@@ -22,17 +24,17 @@ export const route: Route = {
     handler,
     description: `内容类型
 
-  | 最新 | 热门 |
-  | ---- | ---- |
-  | 1    | 2    |
+| 最新 | 热门 |
+| ---- | ---- |
+| 1    | 2    |
 
   参数
 
   -   \`fulltext\`，全文输出，例如：\`/pingwest/tag/ChinaJoy/1/fulltext\`
 
-  :::tip
+::: tip
   该路由一次最多显示 30 条文章
-  :::`,
+:::`,
 };
 
 async function handler(ctx) {

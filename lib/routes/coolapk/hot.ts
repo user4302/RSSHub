@@ -1,6 +1,8 @@
-import { Route } from '@/types';
+import type { Route } from '@/types';
 import got from '@/utils/got';
+
 import utils from './utils';
+
 const getLinkAndTitle = (type, period) => {
     const baseURL = 'https://api.coolapk.com/v6/page/dataList?url=';
     let link;
@@ -56,11 +58,11 @@ const getLinkAndTitle = (type, period) => {
                 statDays: '30days',
             },
         };
-        link = `#/feed/coolPictureList?statDays=` + trans[period].statDays + `&listType=statFavNum&buildCard=1&title=` + trans[period].description + `&page=1`;
+        link = '#/feed/coolPictureList?statDays=' + trans[period].statDays + '&listType=statFavNum&buildCard=1&title=' + trans[period].description + '&page=1';
         res.title = '酷图榜-' + trans[period].description;
     } else {
-        link = `#/feed/statList?statType=` + periods[period].statType + `&sortField=` + types[type].sortField + `&title=` + periods[period].description + `&page=1`;
-        res.title = types[type].title + `-` + periods[period].description;
+        link = '#/feed/statList?statType=' + periods[period].statType + '&sortField=' + types[type].sortField + '&title=' + periods[period].description + '&page=1';
+        res.title = types[type].title + '-' + periods[period].description;
     }
     res.link = baseURL + encodeURIComponent(link);
     return res;
@@ -89,16 +91,16 @@ export const route: Route = {
     maintainers: ['xizeyoupan'],
     handler,
     description: `| 参数名称 | 今日热门 | 点赞榜 | 评论榜 | 收藏榜 | 酷图榜 |
-  | -------- | -------- | ------ | ------ | ------ | ------ |
-  | type     | jrrm     | dzb    | plb    | scb    | ktb    |
+| -------- | -------- | ------ | ------ | ------ | ------ |
+| type     | jrrm     | dzb    | plb    | scb    | ktb    |
 
-  | 参数名称 | 日榜  | 周榜   |
-  | -------- | ----- | ------ |
-  | period   | daily | weekly |
+| 参数名称 | 日榜  | 周榜   |
+| -------- | ----- | ------ |
+| period   | daily | weekly |
 
-  :::tip
+::: tip
   今日热门没有周榜，酷图榜日榜的参数会变成周榜，周榜的参数会变成月榜。
-  :::`,
+:::`,
 };
 
 async function handler(ctx) {
@@ -127,7 +129,7 @@ async function handler(ctx) {
     return {
         title,
         link: 'https://www.coolapk.com/',
-        description: `热榜-` + title,
+        description: '热榜-' + title,
         item: out,
     };
 }

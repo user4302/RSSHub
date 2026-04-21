@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+
 import cacheIn from './cache';
 import utils from './utils';
 
@@ -68,6 +69,7 @@ async function handler(ctx) {
         title: `${userName} 的 bilibili 频道 ${channelInfo.meta.name}`,
         link,
         description: `${userName} 的 bilibili 频道`,
+        image: face,
         logo: face,
         icon: face,
         item: data.archives.map((item) => ({

@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -23,7 +24,7 @@ export const route: Route = {
     name: '惠州市人民政府',
     maintainers: ['Fatpandac'],
     handler,
-    description: `#### 政务公开 {#guang-dong-sheng-ren-min-zheng-fu-hui-zhou-shi-ren-min-zheng-fu-zheng-wu-gong-kai}`,
+    description: '#### 政务公开 {#guang-dong-sheng-ren-min-zheng-fu-hui-zhou-shi-ren-min-zheng-fu-zheng-wu-gong-kai}',
 };
 
 async function handler(ctx) {
@@ -34,12 +35,12 @@ async function handler(ctx) {
     const $ = load(response.data);
     const title = $('span#navigation').children('a').last().text();
     const list = $('ul.ul_art_row')
-        .map((_, item) => ({
+        .toArray()
+        .map((item) => ({
             title: $(item).find('a').text().trim(),
             link: $(item).find('a').attr('href'),
             pubDate: timezone(parseDate($(item).find('li.li_art_date').text().trim()), +8),
-        }))
-        .get();
+        }));
 
     const items = await Promise.all(
         list.map((item) =>
